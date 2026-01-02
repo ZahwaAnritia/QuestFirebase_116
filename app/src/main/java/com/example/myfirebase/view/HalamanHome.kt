@@ -1,5 +1,6 @@
 package com.example.myfirebase.view
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -50,6 +52,12 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    // TAMBAHKAN INI - Refresh data setiap kali screen muncul
+    LaunchedEffect(Unit) {
+        Log.d("HomeScreen", "Screen appeared, refreshing data...")
+        viewModel.loadSiswa()
+    }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -97,10 +105,27 @@ fun HomeBody(
     ) {
         when (statusUiSiswa) {
             is StatusUiSiswa.Loading -> LoadingScreen()
-            is StatusUiSiswa.Success -> DaftarSiswa(
-                itemSiswa = statusUiSiswa.siswa,
-                onSiswaClick = { onSiswaClick(it.id.toInt()) }
-            )
+            is StatusUiSiswa.Success -> {
+                Log.d("HomeBody", "Showing ${statusUiSiswa.siswa.size} items")
+                if (statusUiSiswa.siswa.isEmpty()) {
+                    // Tampilkan pesan jika data kosong
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Belum ada data siswa",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    }
+                } else {
+                    DaftarSiswa(
+                        itemSiswa = statusUiSiswa.siswa,
+                        onSiswaClick = { onSiswaClick(it.id.toInt()) }
+                    )
+                }
+            }
             is StatusUiSiswa.Error -> ErrorScreen(
                 retryAction = retryAction,
                 modifier = modifier.fillMaxSize()
@@ -141,13 +166,19 @@ fun DaftarSiswa(
     onSiswaClick: (Siswa) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    Log.d("DaftarSiswa", "Rendering ${itemSiswa.size} items")
+
     LazyColumn(modifier = modifier) {
         items(items = itemSiswa, key = { it.id }) { person ->
+            Log.d("DaftarSiswa", "Item: ${person.nama}, ID: ${person.id}")
             ItemSiswa(
                 siswa = person,
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_small))
-                    .clickable { onSiswaClick(person) }
+                    .clickable {
+                        Log.d("DaftarSiswa", "Clicked siswa: ${person.nama}, ID: ${person.id}")
+                        onSiswaClick(person)
+                    }
             )
         }
     }

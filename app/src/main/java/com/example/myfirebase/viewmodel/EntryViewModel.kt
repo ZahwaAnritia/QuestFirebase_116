@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import android.util.Log
 import com.example.myfirebase.modeldata.DetailSiswa
 import com.example.myfirebase.modeldata.UIStateSiswa
 import com.example.myfirebase.repositori.RepositorySiswa
@@ -37,9 +38,15 @@ class EntryViewModel(
     /* Fungsi untuk menyimpan data yang di-entry */
     suspend fun addSiswa() {
         if (validasiInput()) {
-            repositorySiswa.postDataSiswa(
-                uiStateSiswa.detailSiswa.toDataSiswa()
-            )
+            try {
+                repositorySiswa.postDataSiswa(
+                    uiStateSiswa.detailSiswa.toDataSiswa()
+                )
+                Log.d("EntryViewModel", "Data berhasil disimpan")
+            } catch (e: Exception) {
+                Log.e("EntryViewModel", "Error saat menyimpan data: ${e.message}")
+                throw e // Re-throw untuk di-handle di UI
+            }
         }
     }
 }

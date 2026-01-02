@@ -57,8 +57,14 @@ fun EntrySiswaScreen(
             onSiswaValueChange = viewModel::updateUiState,
             onSaveClick = {
                 coroutineScope.launch {
-                    viewModel.addSiswa()
-                    navigateBack()
+                    try {
+                        viewModel.addSiswa()
+                        navigateBack()
+                    } catch (e: Exception) {
+                        // Log error atau tampilkan pesan ke user
+                        android.util.Log.e("EntrySiswaScreen", "Error saving: ${e.message}", e)
+                        // Jangan navigateBack() jika error
+                    }
                 }
             },
             modifier = Modifier
@@ -68,7 +74,6 @@ fun EntrySiswaScreen(
         )
     }
 }
-
 @Composable
 fun EntrySiswaBody(
     uiStateSiswa: UIStateSiswa,

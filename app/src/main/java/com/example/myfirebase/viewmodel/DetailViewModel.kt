@@ -1,5 +1,6 @@
 package com.example.myfirebase.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -29,23 +30,37 @@ class DetailViewModel(
         private set
 
     init {
+        Log.d("DetailViewModel", "Init with siswaId: $siswaId")
         loadSiswa()
     }
 
     fun loadSiswa() {
         viewModelScope.launch {
+            Log.d("DetailViewModel", "Loading siswa with ID: $siswaId")
             statusUIDetail = StatusUIDetail.Loading
+
             statusUIDetail = try {
                 val siswaList = repositorySiswa.getDataSiswa()
+                Log.d("DetailViewModel", "Got ${siswaList.size} siswa from repository")
+
+                siswaList.forEach {
+                    Log.d("DetailViewModel", "Siswa in list - ID: ${it.id} (${it.id.toInt()}), Nama: ${it.nama}")
+                }
+
                 val siswa = siswaList.find { it.id.toInt() == siswaId }
+
                 if (siswa != null) {
+                    Log.d("DetailViewModel", "Found siswa: ${siswa.nama}")
                     StatusUIDetail.Success(siswa)
                 } else {
+                    Log.e("DetailViewModel", "Siswa with ID $siswaId not found!")
                     StatusUIDetail.Error
                 }
             } catch (e: IOException) {
+                Log.e("DetailViewModel", "IOException: ${e.message}", e)
                 StatusUIDetail.Error
             } catch (e: Exception) {
+                Log.e("DetailViewModel", "Exception: ${e.message}", e)
                 StatusUIDetail.Error
             }
         }
@@ -54,8 +69,11 @@ class DetailViewModel(
     suspend fun hapusSatuSiswa() {
         viewModelScope.launch {
             try {
+                Log.d("DetailViewModel", "Deleting siswa with ID: $siswaId")
                 repositorySiswa.deleteSiswa(siswaId.toLong())
+                Log.d("DetailViewModel", "Delete successful")
             } catch (e: Exception) {
+                Log.e("DetailViewModel", "Delete error: ${e.message}", e)
                 e.printStackTrace()
             }
         }.join()

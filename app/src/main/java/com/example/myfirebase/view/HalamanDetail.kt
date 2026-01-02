@@ -1,5 +1,6 @@
 package com.example.myfirebase.view
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,6 +51,12 @@ fun DetailSiswaScreen(
     modifier: Modifier = Modifier,
     viewModel: DetailViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
+    // TAMBAHKAN INI - Refresh data setiap kali screen muncul
+    LaunchedEffect(Unit) {
+        Log.d("DetailScreen", "Screen appeared, refreshing data...")
+        viewModel.loadSiswa()
+    }
+
     Scaffold(
         topBar = {
             SiswaTopAppBar(
@@ -58,13 +66,20 @@ fun DetailSiswaScreen(
             )
         },
         floatingActionButton = {
-            val uiState = viewModel.statusUIDetail
             FloatingActionButton(
                 onClick = {
+                    val uiState = viewModel.statusUIDetail
+                    Log.d("DetailScreen", "FAB clicked, current state: $uiState")
+
                     when (uiState) {
-                        is StatusUIDetail.Success ->
-                            navigateToEditItem(uiState.siswa.id.toInt())
-                        else -> {}
+                        is StatusUIDetail.Success -> {
+                            val siswaId = uiState.siswa.id.toInt()
+                            Log.d("DetailScreen", "Navigating to edit with ID: $siswaId")
+                            navigateToEditItem(siswaId)
+                        }
+                        else -> {
+                            Log.w("DetailScreen", "Cannot navigate, state is not Success")
+                        }
                     }
                 },
                 shape = MaterialTheme.shapes.medium,
@@ -156,7 +171,7 @@ fun DetailDataSiswa(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
         ) {
             BarisDetailData(
-                labelResID = R.string.nama,
+                labelResID = R.string.nama1,
                 itemDetail = siswa.nama,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
@@ -164,7 +179,7 @@ fun DetailDataSiswa(
             )
 
             BarisDetailData(
-                labelResID = R.string.alamat,
+                labelResID = R.string.alamat1,
                 itemDetail = siswa.alamat,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
@@ -172,7 +187,7 @@ fun DetailDataSiswa(
             )
 
             BarisDetailData(
-                labelResID = R.string.telpon,
+                labelResID = R.string.telpon1,
                 itemDetail = siswa.telpon,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
