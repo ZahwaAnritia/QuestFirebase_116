@@ -8,9 +8,10 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.2"
 composeBom = "2024.09.00"
-
 firebase-bom = "33.1.2"
 coroutines-play-services = "1.8.1"
+
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,10 +33,12 @@ lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version = "2.9.3"}
 navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.9.3"}
 
-firebase-com = { module = "com/google.firebase:firebase-bom", version.ref = "firebase-bom"}
+firebase-bom = { module = "com/google.firebase:firebase-bom", version.ref = "firebase-bom"}
 firebase-firestore = {module = "com.google.firebase:firebase-firestore"}
 firebase-analytics = { module = "com.google.firebase:firebase-analytics"}
 coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines-play-services"}
+
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
