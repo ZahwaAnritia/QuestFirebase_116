@@ -5,12 +5,13 @@ import com.example.myfirebase.modeldata.Siswa
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
+
 interface RepositorySiswa {
     suspend fun getDataSiswa(): List<Siswa>
     suspend fun postDataSiswa(siswa: Siswa)
-    //suspend fun deleteSiswa(id: Long)
-    //suspend fun getSatuSiswa(id: Long): Siswa
-    //suspend fun updateSiswa(siswa: Siswa)
+    suspend fun getSatuSiswa(id: Long): Siswa?
+    suspend fun editSatuSiswa(id: Long, siswa: Siswa)
+    suspend fun hapusSatuSiswa(id: Long)
 }
 
 class FirebaseRepositorySiswa : RepositorySiswa {
@@ -20,21 +21,15 @@ class FirebaseRepositorySiswa : RepositorySiswa {
 
     override suspend fun getDataSiswa(): List<Siswa> {
         return try {
-            Log.d("Repository", "Fetching data...")
-            val docs = collection.get().await().documents
-            Log.d("Repository", "Found ${docs.size} documents")
-
-            docs.map { doc ->
-                Log.d("Repository", "Doc ID: ${doc.id}, Data: ${doc.data}")
+            collection.get().await().documents.map { doc ->
                 Siswa(
-                    id = doc.getLong("id") ?: 0L,
+                    id = doc.getLong("id")?.toLong() ?: 0,
                     nama = doc.getString("nama") ?: "",
                     alamat = doc.getString("alamat") ?: "",
                     telpon = doc.getString("telpon") ?: ""
                 )
             }
         } catch (e: Exception) {
-            Log.e("Repository", "Error: ${e.message}", e)
             emptyList()
         }
     }
@@ -51,12 +46,43 @@ class FirebaseRepositorySiswa : RepositorySiswa {
             "telpon" to siswa.telpon
         )
 
-        Log.d("Repository", "Posting data: $data")
         docRef.set(data).await()
-        Log.d("Repository", "Data saved with doc ID: ${docRef.id}")
     }
 
+    override suspend fun getSatuSiswa(id: Long): Siswa? {
+        return try {
+            val query = collection.whereEqualTo("id", id).get().await()
+            query.documents.firstOrNull()?.let { doc ->
+                Siswa(
+                    id = doc.getLong("id")?.toLong() ?: 0,
+                    nama = doc.getString("nama") ?: "",
+                    alamat = doc.getString("alamat") ?: "",
+                    telpon = doc.getString("telpon") ?: ""
+                )
+            }
+        } catch (e: Exception) {
+            println("Gagal baca data siswa : ${e.message}")
+            null
+        }
+    }
 
+    override suspend fun editSatuSiswa(id: Long, siswa: Siswa) {
+        val docQuery = collection.whereEqualTo("id", id).get().await()
+        val docId = docQuery.documents.firstOrNull()?.id ?: return
+
+        collection.document(docId).set(
+            mapOf(
+                "id" to siswa.id,
+                "nama" to siswa.nama,
+                "alamat" to siswa.alamat,
+                "telpon" to siswa.telpon
+            )
+        ).await()
+    }
+
+    override suspend fun hapusSatuSiswa(id: Long) {
+        val docQuery = collection.whereEqualTo("id", id).get().await()
+        val docId = docQuery.documents.firstOrNull()?.id ?: return
+        collection.document(docId).delete().await()
+    }
 }
-
-
