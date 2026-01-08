@@ -70,7 +70,7 @@ class DetailViewModel(
         viewModelScope.launch {
             try {
                 Log.d("DetailViewModel", "Deleting siswa with ID: $idSiswa")
-                repositorySiswa.deleteSiswa(idSiswa.toLong())
+                repositorySiswa.hapusSatuSiswa(idSiswa.toLong())
                 Log.d("DetailViewModel", "Delete successful")
             } catch (e: Exception) {
                 Log.e("DetailViewModel", "Delete error: ${e.message}", e)
