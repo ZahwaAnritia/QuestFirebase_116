@@ -51,5 +51,45 @@ fun DetailSiswaScreen(
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DetailViewModel = viewModel(factory = PenyediaViewModel.Factory)
-)
-}
+) {
+    LaunchedEffect(Unit) {
+        Log.d("DetailScreen", "Screen appeared, refreshing data...")
+        viewModel.loadSiswa()
+    }
+
+    Scaffold(
+        topBar = {
+            SiswaTopAppBar(
+                title = stringResource(DestinasiDetail.titleRes),
+                canNavigateBack = true,
+                navigateUp = navigateBack
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    val uiState = viewModel.statusUIDetail
+                    Log.d("DetailScreen", "FAB clicked, current state: $uiState")
+
+                    when (uiState) {
+                        is StatusUIDetail.Success -> {
+                            val siswaId = uiState.siswa.id.toInt()
+                            Log.d("DetailScreen", "Navigating to edit with ID: $siswaId")
+                            navigateToEditItem(siswaId)
+                        }
+                        else -> {
+                            Log.w("DetailScreen", "Cannot navigate, state is not Success")
+                        }
+                    }
+                },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit_siswa),
+                )
+            }
+        },
+        modifier = modifier
+    )
