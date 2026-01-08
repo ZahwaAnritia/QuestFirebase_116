@@ -18,3 +18,64 @@ sealed interface StatusUIDetail {
     object Error : StatusUIDetail
     object Loading : StatusUIDetail
 }
+
+class DetailViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val repositorySiswa: RepositorySiswa
+) : ViewModel() {
+
+    private val idSiswa: Int = checkNotNull(savedStateHandle[DestinasiDetail.siswaIdArg])
+
+    var statusUIDetail: StatusUIDetail by mutableStateOf(StatusUIDetail.Loading)
+        private set
+
+    init {
+        Log.d("DetailViewModel", "Init with siswaId: $idSiswa")
+        loadSiswa()
+    }
+
+    fun loadSiswa() {
+        viewModelScope.launch {
+            Log.d("DetailViewModel", "Loading siswa with ID: $idSiswa")
+            statusUIDetail = StatusUIDetail.Loading
+
+            statusUIDetail = try {
+                val siswaList = repositorySiswa.getDataSiswa()
+                Log.d("DetailViewModel", "Got ${siswaList.size} siswa from repository")
+
+                siswaList.forEach {
+                    Log.d("DetailViewModel", "Siswa in list - ID: ${it.id} (${it.id.toInt()}), Nama: ${it.nama}")
+                }
+
+                val siswa = siswaList.find { it.id.toInt() == idSiswa }
+
+                if (siswa != null) {
+                    Log.d("DetailViewModel", "Found siswa: ${siswa.nama}")
+                    StatusUIDetail.Success(siswa)
+                } else {
+                    Log.e("DetailViewModel", "Siswa with ID $idSiswa not found!")
+                    StatusUIDetail.Error
+                }
+            } catch (e: IOException) {
+                Log.e("DetailViewModel", "IOException: ${e.message}", e)
+                StatusUIDetail.Error
+            } catch (e: Exception) {
+                Log.e("DetailViewModel", "Exception: ${e.message}", e)
+                StatusUIDetail.Error
+            }
+        }
+    }
+
+    suspend fun hapusSatuSiswa() {
+        viewModelScope.launch {
+            try {
+                Log.d("DetailViewModel", "Deleting siswa with ID: $idSiswa")
+                repositorySiswa.deleteSiswa(idSiswa.toLong())
+                Log.d("DetailViewModel", "Delete successful")
+            } catch (e: Exception) {
+                Log.e("DetailViewModel", "Delete error: ${e.message}", e)
+                e.printStackTrace()
+            }
+        }.join()
+    }
+}
