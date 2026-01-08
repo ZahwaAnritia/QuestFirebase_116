@@ -14,14 +14,14 @@ object PenyediaViewModel {
     val Factory = viewModelFactory {
         initializer { HomeViewModel(aplikasiDataSiswa().container.repositorySiswa)}
         initializer { EntryViewModel(aplikasiDataSiswa().container.repositorySiswa) }
-        //initializer { DetailViewModel(createSavedStateHandle(), aplikasiDataSiswa().container.repositorySiswa)
+        initializer { DetailViewModel(createSavedStateHandle(), aplikasiDataSiswa().container.repositorySiswa)
 
-        //}
-        //initializer {
-        //    EditViewModel(
-        //        createSavedStateHandle(),
-        //        aplikasiDataSiswa().container.repositorySiswa
-         //   )
-        //}
+        }
+        initializer {
+            EditViewModel(
+                createSavedStateHandle(),
+                aplikasiDataSiswa().container.repositorySiswa
+            )
+        }
     }
 }

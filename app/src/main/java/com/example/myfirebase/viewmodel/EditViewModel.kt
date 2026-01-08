@@ -26,8 +26,8 @@ class EditViewModel(
         private set
 
     private val idSiswa: Long =
-        savedStateHandle.get<String>(DestinasiDetail.siswaIdArg)?.toLong()
-            ?: error("idSiswa tidak ditemukan di SavedStateHandle")
+        savedStateHandle.get<Int>(DestinasiEdit.itemIdArg)?.toLong()
+            ?: throw IllegalStateException("itemId tidak ditemukan di SavedStateHandle")
 
 
     init {
